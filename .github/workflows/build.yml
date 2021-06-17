@@ -30,10 +30,6 @@ jobs:
       - name: Check building
         run: ./gradlew gem --console rich --info
 
-      - name: JaCoCo test report
-        if: success()
-        run: ./gradlew jacocoTestReport
-
       - name: Pack reports
         if: always()
         run: zip -9 -r -q reports.zip ./build/reports
