@@ -8,6 +8,9 @@ plugins {
 
 repositories {
     mavenCentral()
+    maven {
+        url "https://jitpack.io"
+    }
 }
 
 group = "org.embulk"
@@ -50,7 +53,7 @@ dependencies {
     compile "com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.6.7"
     compile "javax.validation:validation-api:1.1.0.Final"
 
-    compile "org.embulk:embulk-base-restclient:0.10.1"
+    compile "com.github.st-tech:embulk-base-restclient:0.10.2"
     compile "org.embulk:embulk-util-retryhelper-jetty92:0.8.2"
 
     compile "org.embulk:embulk-util-timestamp:0.2.1"
