@@ -87,8 +87,8 @@ public class ElasticsearchOutputPluginDelegate
         void setAlias(Optional<String> aliasName);
 
         @Config("index_type")
-        @ConfigDefault("_doc")
-        String getType();
+        @ConfigDefault("null")
+        Optional<String> getType();
 
         @Config("id")
         @ConfigDefault("null")
@@ -236,8 +236,8 @@ public class ElasticsearchOutputPluginDelegate
         log.info(String.format("Connecting to Elasticsearch version:%s", client.getEsVersion(task)));
         log.info("Executing plugin with '{}' mode.", task.getMode());
         client.validateIndexOrAliasName(task.getIndex(), "index");
-        if (!task.getType().equals("_doc")) {
-            client.validateIndexOrAliasName(task.getType(), "index_type");
+        if (task.getType().isPresent()) {
+            client.validateIndexOrAliasName(task.getType().get(), "index_type");
         }
 
         if (task.getMode().equals(Mode.REPLACE)) {
