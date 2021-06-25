@@ -1,3 +1,19 @@
+/*
+ * Copyright 2017 The Embulk project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.embulk.output.elasticsearch;
 
 import org.eclipse.jetty.http.HttpMethod;
@@ -7,6 +23,8 @@ import org.embulk.config.ConfigSource;
 import org.embulk.output.elasticsearch.ElasticsearchOutputPluginDelegate.PluginTask;
 import org.embulk.spi.Exec;
 import org.embulk.spi.time.Timestamp;
+import org.embulk.util.config.ConfigMapper;
+import org.embulk.util.config.ConfigMapperFactory;
 import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Rule;
@@ -35,12 +53,16 @@ public class TestElasticsearchHttpClient
         utils = new ElasticsearchTestUtils();
         utils.initializeConstant();
 
-        PluginTask task = utils.config().loadConfig(PluginTask.class);
+        final PluginTask task = CONFIG_MAPPER.map(utils.config(), PluginTask.class);
         utils.prepareBeforeTest(task);
     }
 
     @Rule
     public EmbulkTestRuntime runtime = new EmbulkTestRuntime();
+
+    private static final ConfigMapperFactory CONFIG_MAPPER_FACTORY = ElasticsearchOutputPlugin.CONFIG_MAPPER_FACTORY;
+    private static final ConfigMapper CONFIG_MAPPER = ElasticsearchOutputPlugin.CONFIG_MAPPER;
+
     private ElasticsearchTestUtils utils;
 
     @Test
@@ -102,7 +124,7 @@ public class TestElasticsearchHttpClient
     public void testCreateAlias() throws Exception
     {
         ElasticsearchHttpClient client = new ElasticsearchHttpClient();
-        PluginTask task = utils.config().loadConfig(PluginTask.class);
+        final PluginTask task = CONFIG_MAPPER.map(utils.config(), PluginTask.class);
         // delete index
         Method method = ElasticsearchHttpClient.class.getDeclaredMethod("deleteIndex", String.class, PluginTask.class);
         method.setAccessible(true);
@@ -133,7 +155,7 @@ public class TestElasticsearchHttpClient
     public void testIsIndexExistingWithNonExistsIndex()
     {
         ElasticsearchHttpClient client = new ElasticsearchHttpClient();
-        PluginTask task = utils.config().loadConfig(PluginTask.class);
+        final PluginTask task = CONFIG_MAPPER.map(utils.config(), PluginTask.class);
         assertThat(client.isIndexExisting("non-existing-index", task), is(false));
     }
 
@@ -141,7 +163,7 @@ public class TestElasticsearchHttpClient
     public void testIsAliasExistingWithNonExistsAlias()
     {
         ElasticsearchHttpClient client = new ElasticsearchHttpClient();
-        PluginTask task = utils.config().loadConfig(PluginTask.class);
+        final PluginTask task = CONFIG_MAPPER.map(utils.config(), PluginTask.class);
         assertThat(client.isAliasExisting("non-existing-alias", task), is(false));
     }
 
@@ -150,7 +172,7 @@ public class TestElasticsearchHttpClient
     {
         ElasticsearchHttpClient client = new ElasticsearchHttpClient();
 
-        ConfigSource config = Exec.newConfigSource()
+        ConfigSource config = CONFIG_MAPPER_FACTORY.newConfigSource()
                 .set("auth_method", "basic")
                 .set("user", "username")
                 .set("password", "password")
@@ -158,6 +180,8 @@ public class TestElasticsearchHttpClient
                 .set("index_type", "idx_type")
                 .set("nodes", ES_NODES);
 
-        assertThat(client.getAuthorizationHeader(config.loadConfig(PluginTask.class)), is("Basic dXNlcm5hbWU6cGFzc3dvcmQ="));
+        assertThat(
+                client.getAuthorizationHeader(CONFIG_MAPPER.map(config, PluginTask.class)),
+                is("Basic dXNlcm5hbWU6cGFzc3dvcmQ="));
     }
 }

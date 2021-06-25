@@ -1,10 +1,26 @@
+/*
+ * Copyright 2017 The Embulk project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package org.embulk.output.elasticsearch;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import org.embulk.EmbulkTestRuntime;
 import org.embulk.config.ConfigSource;
 import org.embulk.output.elasticsearch.ElasticsearchOutputPluginDelegate.PluginTask;
-import org.embulk.spi.Exec;
 import org.embulk.spi.Schema;
 import org.embulk.spi.type.Types;
 
@@ -73,7 +89,7 @@ public class ElasticsearchTestUtils
 
     public ConfigSource config()
     {
-        return Exec.newConfigSource()
+        return ElasticsearchOutputPlugin.CONFIG_MAPPER_FACTORY.newConfigSource()
                 .set("in", inputConfig())
                 .set("parser", parserConfig(schemaConfig()))
                 .set("type", "elasticsearch")
@@ -88,9 +104,16 @@ public class ElasticsearchTestUtils
                 .set("maximum_retries", 2);
     }
 
+    public ConfigSource oldParserConfig(final EmbulkTestRuntime runtime)
+    {
+        return runtime.getExec().newConfigSource()
+                .set("parser", parserConfig(schemaConfig()))
+                .getNested("parser");
+    }
+
     public ConfigSource configJSON()
     {
-        return Exec.newConfigSource()
+        return ElasticsearchOutputPlugin.CONFIG_MAPPER_FACTORY.newConfigSource()
                 .set("in", inputConfigJSON())
                 .set("parser", parserConfigJSON())
                 .set("type", "elasticsearch")
